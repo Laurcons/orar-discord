@@ -15,7 +15,7 @@ export const webhooks = [
         url: "https://discord.com/api/webhooks/893139722354966568/bVuDjd6IvBlNE6eLNWtnKLA321mVAakkBVF_vRtLVf-WIn_Ve1EONlUvvSOrIdecWJJ_",
         specializations: [
             { name: "MI1", groups: [ "311" ] },
-            { name: "MI2", groups: [ "321" ] },
+            { name: "MI2", groups: [ "322" ] },
         ],
     },
 ];
