@@ -1,0 +1,28 @@
+{
+  "name": "discord-orar",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./build/index.js",
+    "dev": "tsc-watch --onSuccess \"npm start\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.4",
+    "colors": "^1.4.0",
+    "cron": "^1.8.2",
+    "jsdom": "^17.0.0",
+    "luxon": "^2.0.2",
+    "tsc-watch": "^4.5.0",
+    "typescript": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/cron": "^1.7.3",
+    "@types/jsdom": "^16.2.13",
+    "@types/luxon": "^2.0.4",
+    "@types/node": "^16.10.2"
+  }
+}
