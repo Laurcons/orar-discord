@@ -18,6 +18,12 @@ export const webhooks = [
             { name: "MI2", groups: [ "322" ] },
         ],
     },
+    {
+        url: "https://discord.com/api/webhooks/894541168585609226/JSHrqXV27ND2qACq6zq8re6g9_aeQVLrVlPCcNqXWFw9mwSGmxJ22HvaMxitG0rr_jMs",
+        specializations: [
+            { name: "IE1", groups: [ "916" ] },
+        ],
+    },
 ];
 
 export function compileEmbedForGroup(specName: string, groupName: string, tt: Timetable) {
