@@ -2,7 +2,7 @@ import "colors";
 import cron from "cron";
 import { sendAllWebhooks } from "./discord";
 
-const job = new cron.CronJob('* * 19 * * 0-4', () => {
+const job = new cron.CronJob('0 0 17 * * 0-4', () => {
     sendAllWebhooks();
 });
 job.start();
