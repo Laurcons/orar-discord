@@ -27,8 +27,9 @@ export const webhooks = [
 ];
 
 export function compileEmbedForGroup(specName: string, groupName: string, tt: Timetable) {
-    const today = DateTime.now().setLocale("ro");
-    const day = today.weekday + 1;
+    const today = DateTime.now().setLocale("ro-RO");
+    const tomorrow = DateTime.now().plus({ days: 1}).setLocale("ro-RO");
+    const day = tomorrow.weekday;
     const dayName =
         day === 1 ? "luni" :
         day === 2 ? "marti" :
@@ -39,8 +40,8 @@ export function compileEmbedForGroup(specName: string, groupName: string, tt: Ti
     const ttesForDay = tt.filter(tte => tte.day === dayName);
     return {
         title: `Orar grupa ${groupName} specializ. ${specName}`,
-        description: `Pentru ${dayName}, ${today.toLocaleString()}`,
-        footer: { text: `Pentru ${dayName}, ${today.toLocaleString()}` },
+        description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}`,
+        footer: { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()}` },
         timestamp: DateTime.now().toISO(),
         fields: ttesForDay.map(e => ({
             name: `**_(${e.formation})_ ${e.discipline}**`,
