@@ -1,6 +1,7 @@
 
 import axios from "axios";
 import { DateTime } from "luxon";
+import md5 from "md5";
 import { getDatabase } from "./database";
 import { retrieveAllSpecializationTimetables } from "./timetables";
 import { Database, SpecializationTimetable, Timetable, TimetableElement } from "./types";
@@ -20,7 +21,8 @@ function getFrequencyText(freq: string) {
 
 function getColorFromGroup(group: string) {
     // https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
-    return Array.from(group).reduce((hash, char) => 0 | (31 * hash + char.charCodeAt(0)), 0);
+    const hash = md5(group);
+    return parseInt(hash.substring(0, 6), 16);
 }
 
 function getNumberEmoji(digit: number) {
