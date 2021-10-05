@@ -3,9 +3,9 @@ import axios from "axios";
 import { DateTime } from "luxon";
 import { getDatabase } from "./database";
 import { retrieveAllSpecializationTimetables } from "./timetables";
-import { DatabaseEntry, SpecializationTimetable, Timetable } from "./types";
+import { Database, SpecializationTimetable, Timetable } from "./types";
 
-const webhooks = getDatabase() as DatabaseEntry[];
+const webhooks = getDatabase() as Database;
 
 export function compileEmbedForGroup(specName: string, groupName: string, tt: Timetable) {
     const today = DateTime.now().setLocale("ro-RO");

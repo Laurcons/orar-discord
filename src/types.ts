@@ -14,6 +14,7 @@ export interface Timetable extends Array<TimetableElement> { }
 
 export interface SpecializationTimetable extends Record<string, Timetable> { }
 
+export interface Database extends Array<DatabaseEntry> { }
 export interface DatabaseEntry {
     url: string;
     specializations: {
