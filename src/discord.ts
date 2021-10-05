@@ -1,30 +1,11 @@
 
 import axios from "axios";
 import { DateTime } from "luxon";
+import { getDatabase } from "./database";
 import { retrieveAllSpecializationTimetables } from "./timetables";
-import { SpecializationTimetable, Timetable } from "./types";
+import { DatabaseEntry, SpecializationTimetable, Timetable } from "./types";
 
-export const webhooks = [
-    {
-        url: "https://discord.com/api/webhooks/893139562719768646/lYqkuLCYSORXBxX0p8g8aPej8DkUpUIGEKB0BdpXE7XrFhZ58rYz4jvxVxsajoj0FIJN",
-        specializations: [
-            { name: "IE1", groups: [ "916", "913" ] },
-        ],
-    },
-    {
-        url: "https://discord.com/api/webhooks/893139722354966568/bVuDjd6IvBlNE6eLNWtnKLA321mVAakkBVF_vRtLVf-WIn_Ve1EONlUvvSOrIdecWJJ_",
-        specializations: [
-            { name: "MI1", groups: [ "311" ] },
-            { name: "MI2", groups: [ "322" ] },
-        ],
-    },
-    {
-        url: "https://discord.com/api/webhooks/894541168585609226/JSHrqXV27ND2qACq6zq8re6g9_aeQVLrVlPCcNqXWFw9mwSGmxJ22HvaMxitG0rr_jMs",
-        specializations: [
-            { name: "IE1", groups: [ "916" ] },
-        ],
-    },
-];
+const webhooks = getDatabase() as DatabaseEntry[];
 
 export function compileEmbedForGroup(specName: string, groupName: string, tt: Timetable) {
     const today = DateTime.now().setLocale("ro-RO");

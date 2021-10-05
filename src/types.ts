@@ -10,6 +10,14 @@ export interface TimetableElement {
     teacher: string;
 }
 
-export interface Timetable extends Array<TimetableElement> {}
+export interface Timetable extends Array<TimetableElement> { }
 
-export interface SpecializationTimetable extends Record<string, Timetable> {}
+export interface SpecializationTimetable extends Record<string, Timetable> { }
+
+export interface DatabaseEntry {
+    url: string;
+    specializations: {
+        name: string;
+        groups: string[];
+    }[];
+}
