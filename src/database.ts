@@ -1,7 +1,8 @@
 
 import fs from "fs/promises";
+import { Database } from "./types";
 
-let database: any;
+let database: Database | null = null;
 
 export async function loadDatabase() {
     const file = await fs.readFile("./database.json");
@@ -10,7 +11,7 @@ export async function loadDatabase() {
     database = db;
 }
 
-export function getDatabase() {
+export function getDatabase(): Database {
     if (!database)
         throw new Error("Database not loaded");
     return database;
