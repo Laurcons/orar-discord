@@ -82,7 +82,7 @@ export function compileEmbedForGroup(specName: string, groupName: string, tt: Ti
             `[Grafic](https://www.cs.ubbcluj.ro/files/orar/2021-1/grafic/${specName}.html) • ` +
             `[GitHub](https://github.com/Laurcons/orar-discord)` +
             "*",
-        footer: { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.0` },
+        footer: { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.1` },
         timestamp: DateTime.now().toISO(),
         fields: ttesForDay.map((e, index) => ({
             name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
