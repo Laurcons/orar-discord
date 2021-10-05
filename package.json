@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "SET STARTUP_SEND=true && node ./build/index.js",
-    "dev": "tsc-watch --onSuccess \"npm start\""
+    "start": "node ./build/index.js",
+    "debug": "SET STARTUP_SEND=true && npm start",
+    "dev": "tsc-watch --onSuccess \"npm debug\""
   },
   "keywords": [],
   "author": "",
