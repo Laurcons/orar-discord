@@ -24,7 +24,7 @@ function parseGrupaTimetable(table: HTMLTableElement) {
         const timetableElem: TimetableElement = {
             day: cells[0].innerHTML.toLowerCase(),
             timeInterval: cells[1].innerHTML,
-            frequency: cells[2].innerText ?? "",
+            frequency: cells[2].innerHTML !== "&nbsp;" ? cells[2].innerHTML : "",
             location: (cells[3].childNodes[0] as HTMLAnchorElement).innerHTML,
             formation: cells[4].innerHTML,
             type: cells[5].innerHTML.toLowerCase(),
