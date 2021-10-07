@@ -87,7 +87,7 @@ export function compileEmbedForGroup(specName: string, groupName: string, tt: Ti
         fields: ttesForDay.map((e, index) => ({
             name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
             value: `**${e.timeInterval}** in **${e.location}**\n` +
-                `${getTypeNameWithEmoji(e.type)} de ${e.teacher}` +
+                `${getTypeNameWithEmoji(e.type)} cu ${e.teacher}` +
                 getFrequencyText(e.frequency)
         }))
     };
