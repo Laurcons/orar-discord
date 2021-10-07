@@ -20,7 +20,6 @@ function getFrequencyText(freq: string) {
 }
 
 function getColorFromGroup(group: string) {
-    // https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
     const hash = md5(group);
     return parseInt(hash.substring(0, 6), 16);
 }
