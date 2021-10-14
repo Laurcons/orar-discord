@@ -58,7 +58,7 @@ function getTypeNameWithEmoji(type: TimetableElement['type']) {
     return emoji + " **" + type.toUpperCase() + "**";
 }
 
-export function compileEmbedForGroup(specName: string, groupName: string, tt: Timetable) {
+export function compileEmbedsForGroup(specName: string, groupName: string, tt: Timetable): any[] {
     const tomorrow = DateTime.now().plus({ days: 1 }).setLocale("ro-RO");
     const day = tomorrow.weekday;
     const dayName =
@@ -73,8 +73,9 @@ export function compileEmbedForGroup(specName: string, groupName: string, tt: Ti
         if (tte.frequency)
             console.log(tte);
     }
-    return {
-        color: getColorFromGroup(groupName),
+    const groupColor = getColorFromGroup(groupName);
+    const headerEmbed = {
+        color: groupColor,
         title: `Orar grupa ${groupName} specializ. ${specName}`,
         description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}\n` +
             "*" +
@@ -82,42 +83,49 @@ export function compileEmbedForGroup(specName: string, groupName: string, tt: Ti
             `[Grafic](https://www.cs.ubbcluj.ro/files/orar/2021-1/grafic/${specName}.html) • ` +
             `[GitHub](https://github.com/Laurcons/orar-discord)` +
             "*",
-        footer: { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.1` },
-        timestamp: DateTime.now().toISO(),
-        fields: ttesForDay.map((e, index) => ({
-            name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
-            value: `**${e.timeInterval}** in **${e.location}**\n` +
-                `${getTypeNameWithEmoji(e.type)} de ${e.teacher}` +
-                getFrequencyText(e.frequency)
-        }))
     };
+    const intermediaryEmbeds = 
+        ttesForDay.map((e, index) => ({
+            fields: [{
+                name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
+                value: `**${e.timeInterval}** in **${e.location}**\n` +
+                    `${getTypeNameWithEmoji(e.type)} de ${e.teacher}` +
+                    getFrequencyText(e.frequency)
+            }],
+            color: groupColor
+        }) as any);
+    const last = intermediaryEmbeds.at(-1);
+    last.footer = { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.1` };
+    last.timestamp = DateTime.now().toISO();
+    return [ headerEmbed, ...intermediaryEmbeds ];
 }
 
-export async function sendWebhook(specName: string, tts: SpecializationTimetable) {
-    const webhooks = getDatabase();
-    const specWebhooks = webhooks
-        .filter(wh => wh.specializations.some(s => s.name === specName));
-    for (const webhook of specWebhooks) {
-        const groups = webhook.specializations
-            .filter(s => s.name === specName)
-            .map(s => s.groups)
-            .flat();
-        const embeds = groups.map(gr => compileEmbedForGroup(specName, gr, tts[gr]));
-        console.log(JSON.stringify(embeds, null, 2));
-        await axios.post(
-            webhook.url,
-            { embeds }
-        );
-    }
+export async function sendWebhook(url: string, specName: string, groupName: string, timetable: Timetable) {
+    const embeds = compileEmbedsForGroup(specName, groupName, timetable);
+    console.log(JSON.stringify(embeds, null, 2));
+    await axios.post(
+        url,
+        { embeds }
+    );
 }
 
 export async function sendAllWebhooks() {
-    const webhooks = getDatabase();
-    const specs = [...new Set(webhooks
-        .map(wh => wh.specializations.map(sp => sp.name))
-        .flat())];
-    for (const spec of specs) {
-        const tts = await retrieveAllSpecializationTimetables(spec);
-        await sendWebhook(spec, tts);
+    const webhooks = getDatabase().filter(wh => !wh.disabled);
+    const loadedSpecs: Record<string, SpecializationTimetable> = {};
+    for (const wh of webhooks) {
+        for (const spec of wh.specializations) {
+            const tts = await (async () => {
+                if (loadedSpecs[spec.name]) {
+                    return loadedSpecs[spec.name];
+                } else {
+                    const tts = await retrieveAllSpecializationTimetables(spec.name);
+                    loadedSpecs[spec.name] = tts;
+                    return tts;
+                }
+            })();
+            for (const group of spec.groups) {
+                await sendWebhook(wh.url, spec.name, group, tts[group]);
+            }
+        }
     }
 }
