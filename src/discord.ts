@@ -3,6 +3,7 @@ import axios from "axios";
 import { DateTime } from "luxon";
 import md5 from "md5";
 import { getDatabase } from "./database";
+import { getNextDayWeekParity } from "./odd-even";
 import { retrieveAllSpecializationTimetables } from "./timetables";
 import { Database, SpecializationTimetable, Timetable, TimetableElement } from "./types";
 
@@ -67,16 +68,22 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
         day === 4 ? "joi" :
         day === 5 ? "vineri" :
         "invalid";
+    const currentWeekParity = getNextDayWeekParity();
     const ttesForDay = tt.filter(tte => tte.day === dayName);
     for (const tte of ttesForDay) {
         if (tte.frequency)
             console.log(tte);
     }
     const groupColor = getColorFromGroup(groupName);
+    const weekParityMessage =
+        currentWeekParity === "even" ? "Săptămână pară" :
+        currentWeekParity === "odd" ? "Săptămână impară" :
+        "Paritatea săptămânii este necunoscută";
     const headerEmbed = {
         color: groupColor,
         title: `Orar grupa ${groupName} specializ. ${specName}`,
         description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}\n` +
+            `${weekParityMessage}\n` +
             "*" +
             `[Tabelar](https://www.cs.ubbcluj.ro/files/orar/2021-1/tabelar/${specName}.html#:~:text=grupa%20${groupName}) • ` +
             `[Grafic](https://www.cs.ubbcluj.ro/files/orar/2021-1/grafic/${specName}.html) • ` +
@@ -84,15 +91,24 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
             "*",
     };
     const intermediaryEmbeds = 
-        ttesForDay.map((e, index) => ({
-            fields: [{
-                name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
-                value: `**${e.timeInterval}** in **${e.location}**\n` +
-                    `${getTypeNameWithEmoji(e.type)} de ${e.teacher}` +
-                    getFrequencyText(e.frequency)
-            }],
-            color: groupColor
-        }) as any);
+        ttesForDay.map((e, index) => {
+            if (e.weekParity === "unset" || e.weekParity === currentWeekParity) {
+                return {
+                    fields: [{
+                        name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
+                        value: `**${e.timeInterval}** in **${e.location}**\n` +
+                            `${getTypeNameWithEmoji(e.type)} de ${e.teacher}` +
+                            getFrequencyText(e.frequency)
+                    }],
+                    color: groupColor
+                } as any;
+            } else {
+                return {
+                    color: groupColor,
+                    author: { name: "Materie omisă din cauza parității săptămânii. " }
+                } as any;
+            }
+        });
     const last = intermediaryEmbeds.at(-1);
     last.footer = { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.1` };
     last.timestamp = DateTime.now().toISO();
@@ -100,6 +116,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
 }
 
 export async function sendWebhook(url: string, specName: string, groupName: string, timetable: Timetable) {
+    // TODO: add exception handling
     const embeds = compileEmbedsForGroup(specName, groupName, timetable);
     console.log(JSON.stringify(embeds, null, 2));
     await axios.post(

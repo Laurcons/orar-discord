@@ -21,10 +21,15 @@ function parseGrupaTimetable(table: HTMLTableElement) {
             nodeListToArray(row.childNodes)
             .filter(elem => elem.nodeName !== "#text")
             .map(elem => elem as HTMLTableCellElement);
+        // TODO: maybe make this prettier somehow?
         const timetableElem: TimetableElement = {
             day: cells[0].innerHTML.toLowerCase(),
             timeInterval: cells[1].innerHTML,
             frequency: cells[2].innerHTML !== "&nbsp;" ? cells[2].innerHTML : "",
+            weekParity:
+                cells[2].innerHTML.trim() === "sapt. 2" ? "even" :
+                cells[2].innerHTML.trim() === "sapt. 1" ? "odd" :
+                "unset",
             location: (cells[3].childNodes[0] as HTMLAnchorElement).innerHTML,
             formation: cells[4].innerHTML,
             type: cells[5].innerHTML.toLowerCase(),

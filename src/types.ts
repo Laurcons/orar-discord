@@ -3,6 +3,7 @@ export interface TimetableElement {
     day: string;
     timeInterval: string;
     frequency: string;
+    weekParity: "odd" | "even" | "unset";
     location: string;
     formation: string;
     type: string;
