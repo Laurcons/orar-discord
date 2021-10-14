@@ -20,6 +20,22 @@ function getFrequencyText(freq: string) {
     return "\n:warning: " + freq;
 }
 
+function getFlagForSpecializationName(specName: string) {
+    const letter = specName.at(-2);
+    if (letter === "E") return ":flag_gb:";
+    if (letter === "M") return ":flag_hu:";
+    if (letter === "G") return ":flag_de:";
+    return ":flag_ro:";
+}
+
+function getEmojisForSpecializationName(specName: string) {
+    // this is a classic fizzbuzz problem and i'm doing it the naive way because i can
+    if (specName.startsWith("I")) return ":computer:";
+    if (specName.startsWith("MI")) return ":computer::abacus:";
+    if (specName.startsWith("M")) return ":abacus:";
+    throw new Error("Unknown specialization");
+}
+
 function getColorFromGroup(group: string) {
     const hash = md5(group);
     return parseInt(hash.substring(0, 6), 16);
@@ -79,9 +95,12 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
         currentWeekParity === "even" ? "Săptămână pară" :
         currentWeekParity === "odd" ? "Săptămână impară" :
         "Paritatea săptămânii este necunoscută";
+    const emojiPrefix = 
+        (getEmojisForSpecializationName(specName) + getFlagForSpecializationName(specName))
+        .replace(/::/g, ": :");
     const headerEmbed = {
         color: groupColor,
-        title: `Orar grupa ${groupName} specializ. ${specName}`,
+        title: `${emojiPrefix} Orar grupa ${groupName} specializ. ${specName}`,
         description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}\n` +
             `${weekParityMessage}\n` +
             "*" +
