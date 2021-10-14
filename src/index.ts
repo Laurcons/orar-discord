@@ -12,7 +12,7 @@ async function main() {
     });
     job.start();
     
-    if (process.env.STARTUP_SEND)
+    if (process.argv.includes("--startupSend"))
         sendAllWebhooks();
 }
 

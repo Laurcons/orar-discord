@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./build/index.js",
-    "debug": "SET STARTUP_SEND=true && npm start",
-    "dev": "tsc-watch --onSuccess \"npm debug\""
+    "debug": "node ./build/index.js --startupSend",
+    "dev": "tsc-watch --onSuccess \"npm run debug\""
   },
   "keywords": [],
   "author": "",
