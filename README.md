@@ -5,6 +5,8 @@ It is custom-built for the Faculty of Mathematics and Computer Science of Babeș
 
 It scrapes the timetable pages and sends webhooks.
 
+![](https://i.ibb.co/XDgsCYs/image.png)
+
 ## What does the bot do?
 This app is a continually-running Node process. At 13:00 local time every day (working days) it sends a webhook to each configured channel with each configured group & specialization's timetables.
 
