@@ -6,9 +6,9 @@ It is custom-built for the Faculty of Mathematics and Computer Science of Babeș
 It scrapes the timetable pages and sends webhooks.
 
 ## What does the bot do?
-This app is a continually-running Node process. At 17:00 local time every day (working days) it sends a webhook to each configured channel with each configured group & specialization's timetables.
+This app is a continually-running Node process. At 13:00 local time every day (working days) it sends a webhook to each configured channel with each configured group & specialization's timetables.
 
-I am personally hosting this bot on a Frankfurt-based server, so the time difference means that webhooks are sent at 20:00 Romania time.
+I am personally hosting this bot on a Frankfurt-based server, so the time difference means that webhooks are sent at 16:00 Romania time.
 
 ## Self hosting?
 You can, yeah.

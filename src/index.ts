@@ -7,7 +7,7 @@ import { sendAllWebhooks } from "./discord";
 async function main() {
     await loadDatabase();
 
-    const job = new cron.CronJob('0 0 17 * * 0-4', () => {
+    const job = new cron.CronJob('0 0 13 * * 0-4', () => {
         sendAllWebhooks();
     });
     job.start();
