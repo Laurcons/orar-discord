@@ -21,7 +21,7 @@ function getFrequencyText(freq: string) {
 }
 
 function getFlagForSpecializationName(specName: string) {
-    const letter = specName.at(-2);
+    const letter = specName[specName.length - 2];
     if (letter === "E") return ":flag_gb:";
     if (letter === "M") return ":flag_hu:";
     if (letter === "G") return ":flag_de:";
@@ -128,7 +128,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
                 } as any;
             }
         });
-    const last = intermediaryEmbeds.at(-1);
+    const last = intermediaryEmbeds[intermediaryEmbeds.length - 1];
     last.footer = { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.2` };
     last.timestamp = DateTime.now().toISO();
     return [ headerEmbed, ...intermediaryEmbeds ];
