@@ -21,7 +21,7 @@ The specialization codes are the same ones used on the timetable pages, in their
 
 Please do make sure that the group name you're providing DOES exist in the specialization you're providing.
 
-Use `npm install` to install dependencies, `npx tsc` to build the project using TypeScript. Use `npm start` to start the app. It will not do anything until the configured time (13:00). Optionally, you can force it to send webhooks at startup by passing the `--startupSend` argument.
+Use `npm install` to install dependencies, `npx tsc` to build the project using TypeScript. Use `npm start` to start the app. It will not do anything until the configured time (13:00). Optionally, you can force it to send webhooks at startup by passing the `--startupSend` argument (`npm start -- --startupSend`).
 
 ## Want to contribute?
 Do, by all means! You can write issues in the Issues tab, or even fork the project and make a pull request!
