@@ -109,8 +109,8 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
     const headerEmbed = {
         color: groupColor,
         title: `${emojiPrefix} Orar grupa ${groupName} specializ. ${specName}`,
-        description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}` +
-            (!alwaysDisplayDespiteParity ? `\n${weekParityMessage}\n` : "") +
+        description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}\n` +
+            (!alwaysDisplayDespiteParity ? `${weekParityMessage}\n` : "") +
             "*" +
             `[Tabelar](https://www.cs.ubbcluj.ro/files/orar/2021-1/tabelar/${specName}.html#:~:text=grupa%20${groupName}) • ` +
             `[Grafic](https://www.cs.ubbcluj.ro/files/orar/2021-1/grafic/${specName}.html) • ` +
