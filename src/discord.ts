@@ -5,7 +5,7 @@ import md5 from "md5";
 import { getDatabase } from "./database";
 import { getNextDayWeekParity } from "./util/odd-even";
 import { retrieveAllSpecializationTimetables } from "./timetables";
-import { Database, SpecializationTimetable, Timetable, TimetableElement } from "./types";
+import { SpecializationTimetable, Timetable, TimetableElement } from "./types";
 import { getSpecializationFromGroup } from "./util/spec-infer";
 
 function getFrequencyText(freq: string) {
@@ -92,6 +92,13 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
             console.log(tte);
     }
     const groupColor = getColorFromGroup(groupName);
+    // special specs and years where the week parity is different
+    //  than what's defined in this program
+    const alwaysDisplayDespiteParity =
+        specName.startsWith("MM") ||
+        specName.startsWith("IM") ||
+        specName.startsWith("MIM") ||
+        specName.includes("3");
     const weekParityMessage =
         currentWeekParity === "even" ? "Săptămână pară" :
         currentWeekParity === "odd" ? "Săptămână impară" :
@@ -102,8 +109,8 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
     const headerEmbed = {
         color: groupColor,
         title: `${emojiPrefix} Orar grupa ${groupName} specializ. ${specName}`,
-        description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}\n` +
-            `${weekParityMessage}\n` +
+        description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}` +
+            (!alwaysDisplayDespiteParity ? `\n${weekParityMessage}\n` : "") +
             "*" +
             `[Tabelar](https://www.cs.ubbcluj.ro/files/orar/2021-1/tabelar/${specName}.html#:~:text=grupa%20${groupName}) • ` +
             `[Grafic](https://www.cs.ubbcluj.ro/files/orar/2021-1/grafic/${specName}.html) • ` +
@@ -112,7 +119,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
     };
     const intermediaryEmbeds = 
         ttesForDay.map((e, index) => {
-            if (e.weekParity === "unset" || e.weekParity === currentWeekParity) {
+            if (e.weekParity === "unset" || e.weekParity === currentWeekParity || alwaysDisplayDespiteParity) {
                 return {
                     fields: [{
                         name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
