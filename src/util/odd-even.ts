@@ -5,10 +5,9 @@ const years: Record<number, { odd_weeks: number[], even_weeks: number[] }> = {
         odd_weeks: [ 39, 41, 43, 45, 47, 49 ],
         even_weeks: [ 40, 42, 44, 46, 48, 50 ],
     },
-    // TODO: complete with sem II
     2022: {
-        odd_weeks: [ 1, ],
-        even_weeks: [ 2, ], 
+        odd_weeks: [ 1, 8, 10, 12, 14, 16, 19, 21 ],
+        even_weeks: [ 2, 9, 11, 13, 15, 18, 20, 22 ], 
     },
 };
 
