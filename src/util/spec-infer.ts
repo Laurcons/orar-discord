@@ -8,7 +8,7 @@ export function getSpecializationFromGroup(group: string) {
             case "2": return "I";
             case "3": return "MI";
             case "4": return "MM";
-            case "5": return "MM";
+            case "5": return "IM";
             case "6": return "MIM";
             case "7": return "IG";
             case "8": return "MIE";
