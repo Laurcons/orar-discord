@@ -3,9 +3,10 @@ import axios from "axios";
 import { DateTime } from "luxon";
 import md5 from "md5";
 import { getDatabase } from "./database";
-import { getNextDayWeekParity } from "./odd-even";
+import { getNextDayWeekParity } from "./util/odd-even";
 import { retrieveAllSpecializationTimetables } from "./timetables";
 import { Database, SpecializationTimetable, Timetable, TimetableElement } from "./types";
+import { getSpecializationFromGroup } from "./util/spec-infer";
 
 function getFrequencyText(freq: string) {
     if (!freq) return "";
@@ -148,19 +149,18 @@ export async function sendAllWebhooks() {
     const webhooks = getDatabase().filter(wh => !wh.disabled);
     const loadedSpecs: Record<string, SpecializationTimetable> = {};
     for (const wh of webhooks) {
-        for (const spec of wh.specializations) {
+        for (const group of wh.groups) {
+            const specName = getSpecializationFromGroup(group);
             const tts = await (async () => {
-                if (loadedSpecs[spec.name]) {
-                    return loadedSpecs[spec.name];
+                if (loadedSpecs[specName]) {
+                    return loadedSpecs[specName];
                 } else {
-                    const tts = await retrieveAllSpecializationTimetables(spec.name);
-                    loadedSpecs[spec.name] = tts;
+                    const tts = await retrieveAllSpecializationTimetables(specName);
+                    loadedSpecs[specName] = tts;
                     return tts;
                 }
             })();
-            for (const group of spec.groups) {
-                await sendWebhook(wh.url, spec.name, group, tts[group]);
-            }
+            await sendWebhook(wh.url, specName, group, tts[group]);
         }
     }
 }

@@ -19,8 +19,5 @@ export interface Database extends Array<DatabaseEntry> { }
 export interface DatabaseEntry {
     disabled?: boolean;
     url: string;
-    specializations: {
-        name: string;
-        groups: string[];
-    }[];
+    groups: string[];
 }
