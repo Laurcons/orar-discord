@@ -137,7 +137,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
             }
         });
     const last = intermediaryEmbeds[intermediaryEmbeds.length - 1];
-    last.footer = { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.2` };
+    last.footer = { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.3` };
     last.timestamp = DateTime.now().toISO();
     return [ headerEmbed, ...intermediaryEmbeds ];
 }
