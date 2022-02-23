@@ -12,7 +12,7 @@ function nodeListToArray<T extends Node>(list: NodeListOf<T>) {
 }
 
 function parseGrupaTimetable(table: HTMLTableElement) {
-    //                      TBODYS       TRS
+    //                                    TBODYS       TRS
     const rows = nodeListToArray(table.childNodes[1].childNodes);
     let timetable: Timetable = [];
     for (const row of rows) {
@@ -42,7 +42,7 @@ function parseGrupaTimetable(table: HTMLTableElement) {
 }
 
 export async function retrieveAllSpecializationTimetables(specName: string) {
-    console.log("Performing request for " + specName);
+    console.log("Performing timetable request for " + specName);
     const result = await axios.get(`https://www.cs.ubbcluj.ro/files/orar/2021-2/tabelar/${specName}.html`);
     const html = result.data;
     const { window: { document } } = new JSDOM(html);
@@ -53,7 +53,7 @@ export async function retrieveAllSpecializationTimetables(specName: string) {
         const match = grupaRegex.exec(h1.innerHTML);
         if (!match) return;
         const grupa = match[1] ?? "IDK";
-        console.log(grupa.toUpperCase().blue);
+        console.log("Retrieved timetable for", grupa.toUpperCase().blue);
         const tt = parseGrupaTimetable(h1.nextElementSibling as HTMLTableElement);
         tts[grupa] = tt;
     });

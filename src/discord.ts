@@ -1,5 +1,5 @@
 
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { DateTime } from "luxon";
 import md5 from "md5";
 import { getDatabase } from "./database";
@@ -142,14 +142,36 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
     return [ headerEmbed, ...intermediaryEmbeds ];
 }
 
-export async function sendWebhook(url: string, specName: string, groupName: string, timetable: Timetable) {
-    // TODO: add exception handling
+export async function sendWebhooksForGroup(url: string, specName: string, groupName: string, timetable: Timetable) {
     const embeds = compileEmbedsForGroup(specName, groupName, timetable);
-    console.log(JSON.stringify(embeds, null, 2));
-    await axios.post(
-        url,
-        { embeds }
-    );
+    console.log(JSON.stringify(embeds));
+    // make an array of arrays of at most 10 embeds
+    const partitionedEmbeds: [any[]] = [[]];
+    for (const embed of embeds) {
+        let lastPartition = partitionedEmbeds[partitionedEmbeds.length - 1];
+        if (lastPartition.length < 10)
+            lastPartition.push(embed);
+        else
+            partitionedEmbeds.push([]);
+    }
+    for (const partition of partitionedEmbeds) {
+        if (partition.length === 0)
+            continue;
+        try {
+            await axios.post(
+                url,
+                { embeds: partition }
+            );
+        } catch (err: any) {
+            if (err.response) {
+                console.error(err.response.status);
+                console.error(err.response.headers);
+                console.error(err.response.data);
+            } else {
+                console.log(err.message);
+            }
+        }
+    }
 }
 
 export async function sendAllWebhooks() {
@@ -167,7 +189,7 @@ export async function sendAllWebhooks() {
                     return tts;
                 }
             })();
-            await sendWebhook(wh.url, specName, group, tts[group]);
+            await sendWebhooksForGroup(wh.url, specName, group, tts[group]);
         }
     }
 }
