@@ -1,4 +1,3 @@
-
 export interface TimetableElement {
     day: string;
     timeInterval: string;
@@ -18,6 +17,7 @@ export interface SpecializationTimetable extends Record<string, Timetable> { }
 export interface Database extends Array<DatabaseEntry> { }
 export interface DatabaseEntry {
     disabled?: boolean;
+    at?: string;
     url: string;
     groups: string[];
 }

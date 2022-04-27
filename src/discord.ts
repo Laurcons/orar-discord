@@ -2,10 +2,9 @@
 import axios, { AxiosError } from "axios";
 import { DateTime } from "luxon";
 import md5 from "md5";
-import { getDatabase } from "./database";
 import { getNextDayWeekParity } from "./util/odd-even";
 import { retrieveAllSpecializationTimetables } from "./timetables";
-import { SpecializationTimetable, Timetable, TimetableElement } from "./types";
+import { DatabaseEntry, SpecializationTimetable, Timetable, TimetableElement } from "./types";
 import { getSpecializationFromGroup } from "./util/spec-infer";
 
 function getFrequencyText(freq: string) {
@@ -136,7 +135,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
     return [ headerEmbed, ...intermediaryEmbeds ];
 }
 
-export async function sendWebhooksForGroup(url: string, specName: string, groupName: string, timetable: Timetable) {
+async function sendWebhooksForGroup(url: string, specName: string, groupName: string, timetable: Timetable) {
     const embeds = compileEmbedsForGroup(specName, groupName, timetable);
     console.log(JSON.stringify(embeds));
     // make an array of arrays of at most 10 embeds
@@ -168,22 +167,19 @@ export async function sendWebhooksForGroup(url: string, specName: string, groupN
     }
 }
 
-export async function sendAllWebhooks() {
-    const webhooks = getDatabase().filter(wh => !wh.disabled);
+export async function sendWebhooksForEntry(entry: DatabaseEntry) {
     const loadedSpecs: Record<string, SpecializationTimetable> = {};
-    for (const wh of webhooks) {
-        for (const group of wh.groups) {
-            const specName = getSpecializationFromGroup(group);
-            const tts = await (async () => {
-                if (loadedSpecs[specName]) {
-                    return loadedSpecs[specName];
-                } else {
-                    const tts = await retrieveAllSpecializationTimetables(specName);
-                    loadedSpecs[specName] = tts;
-                    return tts;
-                }
-            })();
-            await sendWebhooksForGroup(wh.url, specName, group, tts[group]);
-        }
+    for (const group of entry.groups) {
+        const specName = getSpecializationFromGroup(group);
+        const tts = await (async () => {
+            if (loadedSpecs[specName]) {
+                return loadedSpecs[specName];
+            } else {
+                const tts = await retrieveAllSpecializationTimetables(specName);
+                loadedSpecs[specName] = tts;
+                return tts;
+            }
+        })();
+        await sendWebhooksForGroup(entry.url, specName, group, tts[group]);
     }
 }

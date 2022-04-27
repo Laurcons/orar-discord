@@ -1,19 +1,29 @@
 import "colors";
 import cron from "cron";
-import { loadDatabase } from "./database";
-import { sendAllWebhooks } from "./discord";
+import { loadDatabase, getDatabase } from "./database";
+import { sendWebhooksForEntry } from "./discord";
 
 
 async function main() {
     await loadDatabase();
 
-    const job = new cron.CronJob('0 0 13 * * 0-4', () => {
-        sendAllWebhooks();
-    });
-    job.start();
+    const defaultCronTime = '0 0 13 * * 0-4';
+
+    // create cronjobs
+    const jobs = getDatabase()
+        .filter(entry => !entry.disabled)
+        .map(entry => {
+            console.log("Configuring cronjob for", entry.groups, "at", entry.at ?? "default time", "to", entry.url);
+            return new cron.CronJob(entry.at ?? defaultCronTime, () => {
+                sendWebhooksForEntry(entry);
+            });
+        });
+    jobs.forEach(entry => entry.start());
     
     if (process.argv.includes("--startupSend"))
-        sendAllWebhooks();
+        getDatabase()
+            .filter(entry => !entry.disabled)
+            .forEach(entry => sendWebhooksForEntry(entry));
 }
 
 main();
