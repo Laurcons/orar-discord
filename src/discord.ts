@@ -85,20 +85,14 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
         day === 4 ? "joi" :
         day === 5 ? "vineri" :
         "invalid";
-    const currentWeekParity = getNextDayWeekParity();
+    // subtract year from specname
+    const currentWeekParity = getNextDayWeekParity(specName.substring(0, specName.length - 1));
     const ttesForDay = tt.filter(tte => tte.day === dayName);
     for (const tte of ttesForDay) {
         if (tte.frequency)
             console.log(tte);
     }
     const groupColor = getColorFromGroup(groupName);
-    // special specs and years where the week parity is different
-    //  than what's defined in this program
-    const alwaysDisplayDespiteParity =
-        specName.startsWith("MM") ||
-        specName.startsWith("IM") ||
-        specName.startsWith("MIM") ||
-        specName.includes("3");
     const weekParityMessage =
         currentWeekParity === "even" ? "Săptămână pară" :
         currentWeekParity === "odd" ? "Săptămână impară" :
@@ -110,7 +104,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
         color: groupColor,
         title: `${emojiPrefix} Orar grupa ${groupName} specializ. ${specName}`,
         description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}\n` +
-            (!alwaysDisplayDespiteParity ? `${weekParityMessage}\n` : "") +
+            `${weekParityMessage}\n` +
             "*" +
             `[Tabelar](https://www.cs.ubbcluj.ro/files/orar/2021-2/tabelar/${specName}.html#:~:text=grupa%20${groupName}) • ` +
             `[Grafic](https://www.cs.ubbcluj.ro/files/orar/2021-2/grafic/${specName}.html) • ` +
@@ -119,7 +113,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
     };
     const intermediaryEmbeds = 
         ttesForDay.map((e, index) => {
-            if (e.weekParity === "unset" || e.weekParity === currentWeekParity || alwaysDisplayDespiteParity) {
+            if (e.weekParity === "unset" || currentWeekParity === "none" || e.weekParity === currentWeekParity) {
                 return {
                     fields: [{
                         name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
