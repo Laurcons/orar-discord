@@ -124,7 +124,7 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
         });
     const last = intermediaryEmbeds[intermediaryEmbeds.length - 1];
     last.footer = {
-        text: i18next.t("footerEmbed.text", { day: dayNameLocalized, date: tomorrow.toLocaleString(), version: "v1.3" })
+        text: i18next.t("footerEmbed.text", { day: dayNameLocalized, date: tomorrow.toLocaleString(), version: "v1.4" })
     };
     last.timestamp = DateTime.now().toISO();
     return [ headerEmbed, ...intermediaryEmbeds ];
