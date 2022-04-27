@@ -122,6 +122,13 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
                 } as any;
             }
         });
+    if (intermediaryEmbeds.length == 0) {
+        // this group has no timetable elements! how lucky. and bot-breaking.
+        // push a dummy embed, so that the following code doesn't break.
+        intermediaryEmbeds.push({
+            color: groupColor
+        });
+    }
     const last = intermediaryEmbeds[intermediaryEmbeds.length - 1];
     last.footer = {
         text: i18next.t("footerEmbed.text", { day: dayNameLocalized, date: tomorrow.toLocaleString(), version: "v1.4" })
