@@ -1,5 +1,5 @@
-
-import axios, { AxiosError } from "axios";
+import i18next from 'i18next';
+import axios from "axios";
 import { DateTime } from "luxon";
 import md5 from "md5";
 import { getNextDayWeekParity } from "./util/odd-even";
@@ -14,9 +14,9 @@ function getFrequencyText(freq: string) {
         freq === "sapt. 2" ? ":two:" :
         "";
     if (emoji === ":one:")
-        return "\n:warning::one: Săptămâna 1!";
+        return "\n" + i18next.t("timetableElement.fourthRow", { emoji: ":one:", week: "1" });
     if (emoji === ":two:")
-        return "\n:warning::two: Săptămâna 2!";
+        return "\n" + i18next.t("timetableElement.fourthRow", { emoji: ":two:", week: "2" });
     return "\n:warning: " + freq;
 }
 
@@ -59,55 +59,45 @@ function getNumberEmoji(digit: number) {
 }
 
 function getTypeNameWithEmoji(type: TimetableElement['type']) {
-    const emoji = (() => {
-        switch (type) {
-            case "seminar":
-                return ":regional_indicator_s:";
-            case "laborator":
-                return ":regional_indicator_l:";
-            case "curs":
-                return ":regional_indicator_c:";
-            default:
-                throw new Error("Invalid timetable element type");
-        }
-    })();
-    return emoji + " **" + type.toUpperCase() + "**";
+    return (
+        i18next.t(`timetableElement.typeEmoji.${type}`) + " **" +
+        i18next.t(`timetableElement.type.${type}`) + "**"
+    ).trim(); // maybe the translation omits the emoji; if so, trim the leading space
 }
 
 export function compileEmbedsForGroup(specName: string, groupName: string, tt: Timetable): any[] {
     const tomorrow = DateTime.now().plus({ days: 1 }).setLocale("ro-RO");
     const day = tomorrow.weekday;
-    const dayName =
-        day === 1 ? "luni" :
-        day === 2 ? "marti" :
-        day === 3 ? "miercuri" :
-        day === 4 ? "joi" :
-        day === 5 ? "vineri" :
-        "invalid";
+    const [dayNameInternal, dayNameLocalized] =
+        // first val is value from API; second is localized
+        day === 1 ? ["luni", i18next.t("weekday.monday")] :
+        day === 2 ? ["marti", i18next.t("weekday.tuesday")] :
+        day === 3 ? ["miercuri", i18next.t("weekday.wednesday")] :
+        day === 4 ? ["joi", i18next.t("weekday.thursday")] :
+        day === 5 ? ["vineri", i18next.t("weekday.friday")] :
+        ["invalid", i18next.t("weekday.invalid")];
     // subtract year from specname
     const currentWeekParity = getNextDayWeekParity(specName.substring(0, specName.length - 1));
-    const ttesForDay = tt.filter(tte => tte.day === dayName);
-    for (const tte of ttesForDay) {
-        if (tte.frequency)
-            console.log(tte);
-    }
+    const ttesForDay = tt.filter(tte => tte.day === dayNameInternal);
     const groupColor = getColorFromGroup(groupName);
-    const weekParityMessage =
-        currentWeekParity === "even" ? "Săptămână pară" :
-        currentWeekParity === "odd" ? "Săptămână impară" :
-        "Paritatea săptămânii este necunoscută";
+    const weekParityMessage = i18next.t(`weekParity.${currentWeekParity}`);
     const emojiPrefix = 
         (getEmojisForSpecializationName(specName) + getFlagForSpecializationName(specName))
         .replace(/::/g, ": :");
     const headerEmbed = {
         color: groupColor,
-        title: `${emojiPrefix} Orar grupa ${groupName} specializ. ${specName}`,
-        description: `Pentru ${dayName}, ${tomorrow.toLocaleString()}\n` +
+        title: i18next.t("headerEmbed.title", {
+            emoji: emojiPrefix,
+            group: groupName,
+            spec: specName
+        }),
+        description: 
+            i18next.t("headerEmbed.description", { day: dayNameLocalized, date: tomorrow.toLocaleString() }) + "\n" +
             `${weekParityMessage}\n` +
             "*" +
-            `[Tabelar](https://www.cs.ubbcluj.ro/files/orar/2021-2/tabelar/${specName}.html#:~:text=grupa%20${groupName}) • ` +
-            `[Grafic](https://www.cs.ubbcluj.ro/files/orar/2021-2/grafic/${specName}.html) • ` +
-            `[GitHub](https://github.com/Laurcons/orar-discord)` +
+            `[${i18next.t("headerEmbed.tabular")}](https://www.cs.ubbcluj.ro/files/orar/2021-2/tabelar/${specName}.html#:~:text=grupa%20${groupName}) • ` +
+            `[${i18next.t("headerEmbed.graphic")}](https://www.cs.ubbcluj.ro/files/orar/2021-2/grafic/${specName}.html) • ` +
+            `[${i18next.t("headerEmbed.github")}](https://github.com/Laurcons/orar-discord)` +
             "*",
     };
     const intermediaryEmbeds = 
@@ -115,9 +105,12 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
             if (e.weekParity === "unset" || currentWeekParity === "none" || e.weekParity === currentWeekParity) {
                 return {
                     fields: [{
-                        name: `#${index}: **_(${e.formation})_ ${e.discipline}**`,
-                        value: `**${e.timeInterval}** in **${e.location}**\n` +
-                            `${getTypeNameWithEmoji(e.type)} de ${e.teacher}` +
+                        name: i18next.t("timetableElement.firstRow", {
+                            index, formation: e.formation, discipline: e.discipline
+                        }),
+                        value:
+                            i18next.t("timetableElement.secondRow", { timeInterval: e.timeInterval, location: e.location }) + "\n" +
+                            i18next.t("timetableElement.thirdRow", { type: getTypeNameWithEmoji(e.type), teacher: e.teacher }) +
                             getFrequencyText(e.frequency)
                     }],
                     color: groupColor
@@ -125,12 +118,14 @@ export function compileEmbedsForGroup(specName: string, groupName: string, tt: T
             } else {
                 return {
                     color: groupColor,
-                    author: { name: "Materie omisă din cauza parității săptămânii. " }
+                    author: { name: i18next.t("timetableElement.ommitted") }
                 } as any;
             }
         });
     const last = intermediaryEmbeds[intermediaryEmbeds.length - 1];
-    last.footer = { text: `Pentru ${dayName}, ${tomorrow.toLocaleString()} • v1.3` };
+    last.footer = {
+        text: i18next.t("footerEmbed.text", { day: dayNameLocalized, date: tomorrow.toLocaleString(), version: "v1.3" })
+    };
     last.timestamp = DateTime.now().toISO();
     return [ headerEmbed, ...intermediaryEmbeds ];
 }
@@ -180,6 +175,7 @@ export async function sendWebhooksForEntry(entry: DatabaseEntry) {
                 return tts;
             }
         })();
+        i18next.changeLanguage(entry.lang ?? "en");
         await sendWebhooksForGroup(entry.url, specName, group, tts[group]);
     }
 }
