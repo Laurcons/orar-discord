@@ -43,7 +43,7 @@ function parseGrupaTimetable(table: HTMLTableElement) {
 
 export async function retrieveAllSpecializationTimetables(specName: string) {
     console.log("Performing timetable request for " + specName);
-    const result = await axios.get(`https://www.cs.ubbcluj.ro/files/orar/2021-2/tabelar/${specName}.html`);
+    const result = await axios.get(`https://www.cs.ubbcluj.ro/files/orar/2022-1/tabelar/${specName}.html`);
     const html = result.data;
     const { window: { document } } = new JSDOM(html);
     const tts: SpecializationTimetable = {};
