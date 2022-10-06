@@ -1,63 +1,56 @@
 import { DateTime } from "luxon";
 
-const dateFormat = "dd.MM.yyyy";
+export type WeekRange = [number, number];
+export type WeekRangesForLang = Record<number, WeekRange[]>;
+export type GeneralWeekRanges = Record<'roEn' | 'huDe', WeekRangesForLang>;
+export type WeekParity = 'even' | 'odd' | 'none';
 
-const yearsForRoEn: Record<number, { semester1: string[][], semester2: string[][] }> = {
-    2022: {
-        semester1: [["03.10.2022", "23.12.2022"], ["09.01.2023", "20.01.2023"]],
-        semester2: [["27.02.2023", "14.04.2023"], ["24.04.2023", "09.06.2023"]],
+// merging of semesters' intervals into one is permissible if the first semester
+//  has an even number of weeks. in this case, the second semester's intervals
+//  can just be added to the first semester's and no difference would occur.
+// the following code operates on this assumption. if the assumption isn't met,
+//  the week parity is incorrectly determined
+// it also assumes that no week interval crosses the year boundary (ie. start < end)
+//  if the assumption isn't met, an exception is thrown
+
+const generalWeekRanges: GeneralWeekRanges = {
+    roEn: {
+        2022: [/* year 21,22 omitted */ [40, 51]],
+        2023: [[2, 3], [9, 15], [17, 23], /* year 23-24, here --> */ ]
+    },
+    huDe: {
+        2022: [/* year 21,22 omitted */ [40, 51]],
+        2023: [[2, 3], [9, 14], [16, 23], /* year 23-24, here --> */ ]
     },
 };
 
-const yearsForHuDe: Record<number, { semester1: string[][], semester2: string[][] }> = {
-    2022: {
-        semester1: [["03.10.2022", "23.12.2022"], ["09.01.2023", "20.01.2023"]],
-        semester2: [["27.02.2023", "07.04.2023"], ["17.04.2023", "09.06.2023"]],
-    },
-};
-
-export function getNextDayWeekParity(spec: string): "even" | "odd" | "none" {
+export function getNextDayWeekParity(spec: string): WeekParity {
     const tomorrow = DateTime.now().plus({ days: 1 });
     const weekNumber = tomorrow.weekNumber;
     const year = tomorrow.year;
-    const oddeven = (() => {
+    const weekRanges = (() => {
         if (spec == "MM" || spec == "IM" || spec == "MIM" || spec == "IG")
-            return yearsForHuDe;
-        return yearsForRoEn;
+            return generalWeekRanges.huDe;
+        return generalWeekRanges.roEn;
     })()[year];
     
-    const getWeekParityInSemester = (semester: string[][], weekNumber: number): "even" | "odd" | "none" => {
+    const getWeekParityInWeekRanges = (ranges: WeekRange[], weekNumber: number): WeekParity => {
         let weekCount = 0;
-        for(const period in oddeven.semester1){
-            let startWeek = DateTime.fromFormat(dateFormat, period[0]).weekNumber;
-            let endWeek = DateTime.fromFormat(dateFormat, period[1]).weekNumber;
-            if(startWeek <= endWeek){
+        for (const period of ranges){
+            const [startWeek, endWeek] = period;
+            if (startWeek <= endWeek){
                 if(startWeek <= weekNumber && weekNumber <= endWeek){
                     weekCount += weekNumber - startWeek + 1;
                     return weekCount % 2 == 0 ? "even":"odd";
-                }else{
+                } else {
                     weekCount += endWeek - startWeek + 1;
                 }
-            }else{
-                if(startWeek <= weekNumber){
-                    weekCount += weekNumber - startWeek + 1;
-                    return weekCount % 2 == 0 ? "even":"odd";
-                }else if(weekNumber <= endWeek){
-                    weekCount += (DateTime.fromFormat(dateFormat, period[0]).endOf('year').weekNumber - startWeek + 1) + (endWeek - weekNumber + 1);
-                    return weekCount % 2 == 0 ? "even":"odd";
-                }else{
-                    weekCount += endWeek - startWeek;
-                }
+            } else {
+                throw new Error("Week parity detection expects that no week interval crosses the year boundary. If handling of this is expected, please create an Issue.");
             }
         }
         return "none"; 
     }
 
-    let firstParity = getWeekParityInSemester(oddeven.semester1, weekNumber);
-    let secondParity = getWeekParityInSemester(oddeven.semester1, weekNumber);
-
-    if(firstParity !== 'none'){
-        return firstParity;
-    }
-    return secondParity;
+    return getWeekParityInWeekRanges(weekRanges, weekNumber);
 }
