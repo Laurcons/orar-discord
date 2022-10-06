@@ -1,24 +1,18 @@
 import { DateTime } from "luxon";
 
-const yearsForRoEn: Record<number, { odd_weeks: number[], even_weeks: number[] }> = {
-    2021: {
-        odd_weeks: [39, 41, 43, 45, 47, 49],
-        even_weeks: [40, 42, 44, 46, 48, 50],
-    },
+const dateFormat = "dd.MM.yyyy";
+
+const yearsForRoEn: Record<number, { semester1: string[][], semester2: string[][] }> = {
     2022: {
-        odd_weeks: [1, 8, 10, 12, 14, 16, 19, 21],
-        even_weeks: [2, 9, 11, 13, 15, 18, 20, 22],
+        semester1: [["03.10.2022", "23.12.2022"], ["09.01.2023", "20.01.2023"]],
+        semester2: [["27.02.2023", "14.04.2023"], ["24.04.2023", "09.06.2023"]],
     },
 };
 
-const yearsForHuDe: Record<number, { odd_weeks: number[], even_weeks: number[] }> = {
-    2021: {
-        odd_weeks: [39, 41, 43, 45, 47, 49],
-        even_weeks: [40, 42, 44, 46, 48, 50],
-    },
+const yearsForHuDe: Record<number, { semester1: string[][], semester2: string[][] }> = {
     2022: {
-        odd_weeks: [1, 8, 10, 12, 14, 17, 19, 21],
-        even_weeks: [2, 9, 11, 13, 15, 18, 20, 22],
+        semester1: [["03.10.2022", "23.12.2022"], ["09.01.2023", "20.01.2023"]],
+        semester2: [["27.02.2023", "07.04.2023"], ["17.04.2023", "09.06.2023"]],
     },
 };
 
@@ -31,9 +25,39 @@ export function getNextDayWeekParity(spec: string): "even" | "odd" | "none" {
             return yearsForHuDe;
         return yearsForRoEn;
     })()[year];
-    const isOdd = oddeven.odd_weeks.includes(weekNumber);
-    const isEven = oddeven.even_weeks.includes(weekNumber);
-    if (isOdd) return "odd";
-    if (isEven) return "even";
-    return "none";
+    
+    const getWeekParityInSemester = (semester: string[][], weekNumber: number): "even" | "odd" | "none" => {
+        let weekCount = 0;
+        for(const period in oddeven.semester1){
+            let startWeek = DateTime.fromFormat(dateFormat, period[0]).weekNumber;
+            let endWeek = DateTime.fromFormat(dateFormat, period[1]).weekNumber;
+            if(startWeek <= endWeek){
+                if(startWeek <= weekNumber && weekNumber <= endWeek){
+                    weekCount += weekNumber - startWeek + 1;
+                    return weekCount % 2 == 0 ? "even":"odd";
+                }else{
+                    weekCount += endWeek - startWeek + 1;
+                }
+            }else{
+                if(startWeek <= weekNumber){
+                    weekCount += weekNumber - startWeek + 1;
+                    return weekCount % 2 == 0 ? "even":"odd";
+                }else if(weekNumber <= endWeek){
+                    weekCount += (DateTime.fromFormat(dateFormat, period[0]).endOf('year').weekNumber - startWeek + 1) + (endWeek - weekNumber + 1);
+                    return weekCount % 2 == 0 ? "even":"odd";
+                }else{
+                    weekCount += endWeek - startWeek;
+                }
+            }
+        }
+        return "none"; 
+    }
+
+    let firstParity = getWeekParityInSemester(oddeven.semester1, weekNumber);
+    let secondParity = getWeekParityInSemester(oddeven.semester1, weekNumber);
+
+    if(firstParity !== 'none'){
+        return firstParity;
+    }
+    return secondParity;
 }
